@@ -23,6 +23,22 @@ export const useDashboardData = () => {
     queryFn: async (): Promise<DashboardData> => {
       if (!user) throw new Error('Not authenticated');
 
+      // Use paginated fetching to avoid 1000-row Supabase limit
+      const fetchAll = async (query: any) => {
+        const PAGE_SIZE = 1000;
+        let allData: any[] = [];
+        let from = 0;
+        let hasMore = true;
+        while (hasMore) {
+          const { data, error } = await query.range(from, from + PAGE_SIZE - 1);
+          if (error) throw error;
+          allData = [...allData, ...(data || [])];
+          hasMore = (data?.length || 0) === PAGE_SIZE;
+          from += PAGE_SIZE;
+        }
+        return allData;
+      };
+
       // Build queries - admins see all, regular users see their own
       const dealsQuery = supabase.from('deals').select('stage');
       const accountsQuery = supabase.from('accounts').select('status');
@@ -53,12 +69,12 @@ export const useDashboardData = () => {
         ? supabase.from('security_audit_log').select('id, action, resource_type, resource_id, created_at, details').order('created_at', { ascending: false }).limit(15)
         : Promise.resolve({ data: [], error: null });
 
-      const [dealsRes, accountsRes, contactsRes, actionItemsRes, emailRes, todayRes, activityRes] = await Promise.all([
-        dealsQuery,
-        accountsQuery,
-        contactsQuery,
-        actionItemsQuery,
-        emailQuery,
+      const [dealsData, accountsData, contactsData, actionItemsData, emailData, todayRes, activityRes] = await Promise.all([
+        fetchAll(dealsQuery),
+        fetchAll(accountsQuery),
+        fetchAll(contactsQuery),
+        fetchAll(actionItemsQuery),
+        fetchAll(emailQuery),
         todayQuery,
         activityQuery,
       ]);
