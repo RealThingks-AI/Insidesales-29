@@ -1,44 +1,21 @@
-# CRM QA Fix Plan — Status
 
-## ✅ All Planned Fixes Completed
 
-### Critical
-| # | Issue | Status |
-|---|-------|--------|
-| 1 | XSS in TemplatePreviewModal — added DOMPurify sanitization | ✅ Done |
-| 2 | Dashboard data visibility — admins see all records, users see own | ✅ Done |
-| 3 | Account selector in DealForm — account_id now set via AccountSearchableDropdown | ✅ Done |
-| 4 | Audit log restricted to admin users only in dashboard | ✅ Done |
-| 5 | Deal Form `modified_by` uses current user ID instead of creator | ✅ Done |
-| 6 | Contacts bulk delete cleans up deal_stakeholders, campaign_contacts, deals stakeholder FKs | ✅ Done |
+## Bug: Today's Tasks Popup reopens on every Dashboard navigation
 
-### High
-| # | Issue | Status |
-|---|-------|--------|
-| 7 | Re-added module_type filter to Action Items page | ✅ Done |
-| 8 | Added source + region filters to Contacts page | ✅ Done |
-| 9 | Email Analytics now paginates past 1000-row Supabase limit | ✅ Done |
-| 10 | Renamed all Task/Tasks to Action Items across UI | ✅ Done |
-| 11 | Account status mismatch — aligned filter and dashboard to New/Working/Qualified/Inactive | ✅ Done |
-| 12 | Dashboard queries now paginate past 1000-row Supabase limit | ✅ Done |
+**Root cause**: The popup's `useEffect` runs on every component mount. Dismissing the popup does NOT persist anything unless the "Don't show again today" checkbox is checked. So navigating away and back remounts the component and reopens the popup.
 
-### Medium
-| # | Issue | Status |
-|---|-------|--------|
-| 13 | Notification separator only shows when Mark as read is visible | ✅ Done |
-| 14 | Bulk account delete now cleans up related deals + campaign_accounts | ✅ Done |
-| 15 | Added Forgot Password flow to Auth page | ✅ Done |
-| 16 | Campaign delete already cleans up email_templates and phone_scripts (verified) | ✅ Done |
-| 17 | Clear All notifications now requires confirmation dialog | ✅ Done |
+**Fix** in `src/components/dashboard/TodaysTasksPopup.tsx`:
 
-### Low
-| # | Issue | Status |
-|---|-------|--------|
-| 18 | Removed console.log from UserManagement | ✅ Done |
-| 19 | Fixed Settings h-screen double scroll issue | ✅ Done |
-| 20 | Added ErrorBoundary around lazy-loaded Settings pages | ✅ Done |
-| 21 | Fixed error type assertion in DealForm catch blocks | ✅ Done |
+1. Add a `sessionStorage` key (`tasks-popup-shown-session`) to track if the popup was already shown this browser session
+2. On mount: check both `localStorage` (day-level dismiss) AND `sessionStorage` (session-level shown). Only open if neither is set.
+3. On any dismiss (with or without checkbox):
+   - Always set `sessionStorage` so it won't reopen during this session
+   - If checkbox is checked, also set `localStorage` so it won't open even on a new login that same day
+4. This gives the correct behavior:
+   - First visit of the day → popup shows
+   - Navigate away and back → popup does NOT show (sessionStorage)
+   - New login/new tab → popup shows again (sessionStorage is fresh)
+   - "Don't show again today" checked → won't show even on new login that day (localStorage)
 
-## User Constraints
-- No separate Leads or Meetings modules
-- Consistent Action Items terminology everywhere
+Single file change, ~10 lines modified.
+
