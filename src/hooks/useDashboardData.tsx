@@ -23,6 +23,22 @@ export const useDashboardData = () => {
     queryFn: async (): Promise<DashboardData> => {
       if (!user) throw new Error('Not authenticated');
 
+      // Use paginated fetching to avoid 1000-row Supabase limit
+      const fetchAll = async (query: any) => {
+        const PAGE_SIZE = 1000;
+        let allData: any[] = [];
+        let from = 0;
+        let hasMore = true;
+        while (hasMore) {
+          const { data, error } = await query.range(from, from + PAGE_SIZE - 1);
+          if (error) throw error;
+          allData = [...allData, ...(data || [])];
+          hasMore = (data?.length || 0) === PAGE_SIZE;
+          from += PAGE_SIZE;
+        }
+        return allData;
+      };
+
       // Build queries - admins see all, regular users see their own
       const dealsQuery = supabase.from('deals').select('stage');
       const accountsQuery = supabase.from('accounts').select('status');
@@ -53,12 +69,12 @@ export const useDashboardData = () => {
         ? supabase.from('security_audit_log').select('id, action, resource_type, resource_id, created_at, details').order('created_at', { ascending: false }).limit(15)
         : Promise.resolve({ data: [], error: null });
 
-      const [dealsRes, accountsRes, contactsRes, actionItemsRes, emailRes, todayRes, activityRes] = await Promise.all([
-        dealsQuery,
-        accountsQuery,
-        contactsQuery,
-        actionItemsQuery,
-        emailQuery,
+      const [dealsData, accountsData, contactsData, actionItemsData, emailData, todayRes, activityRes] = await Promise.all([
+        fetchAll(dealsQuery),
+        fetchAll(accountsQuery),
+        fetchAll(contactsQuery),
+        fetchAll(actionItemsQuery),
+        fetchAll(emailQuery),
         todayQuery,
         activityQuery,
       ]);
@@ -67,29 +83,28 @@ export const useDashboardData = () => {
       const dealStages = ['Lead', 'Discussions', 'Qualified', 'RFQ', 'Offered', 'Won', 'Lost', 'Dropped'];
       const dealCounts = dealStages.map(stage => ({
         stage,
-        count: (dealsRes.data || []).filter(d => d.stage === stage).length,
+        count: dealsData.filter((d: any) => d.stage === stage).length,
       }));
 
-      // Process accounts
-      const accountStatuses = ['New', 'Working', 'Hot', 'Nurture'];
+      // Process accounts - aligned with Accounts page filter options
+      const accountStatuses = ['New', 'Working', 'Qualified', 'Inactive'];
       const accountCounts = accountStatuses.map(status => ({
         status,
-        count: (accountsRes.data || []).filter(a => (a.status || 'New') === status).length,
+        count: accountsData.filter((a: any) => (a.status || 'New') === status).length,
       }));
 
       // Process contacts
       const contactSources = ['Website', 'Referral', 'LinkedIn', 'Other'];
-      const contactData = (contactsRes.data || []);
       const contactCounts = contactSources.map(source => {
         if (source === 'Other') {
           return {
             source,
-            count: contactData.filter(c => !['Website', 'Referral', 'LinkedIn'].includes(c.contact_source || '')).length,
+            count: contactsData.filter((c: any) => !['Website', 'Referral', 'LinkedIn'].includes(c.contact_source || '')).length,
           };
         }
         return {
           source,
-          count: contactData.filter(c => c.contact_source === source).length,
+          count: contactsData.filter((c: any) => c.contact_source === source).length,
         };
       });
 
@@ -97,13 +112,12 @@ export const useDashboardData = () => {
       const actionStatuses = ['Open', 'In Progress', 'Completed', 'Cancelled'];
       const actionCounts = actionStatuses.map(status => ({
         status,
-        count: (actionItemsRes.data || []).filter(a => a.status === status).length,
+        count: actionItemsData.filter((a: any) => a.status === status).length,
       }));
 
       // Process email stats
-      const emails = emailRes.data || [];
-      const sent = emails.length;
-      const opened = emails.filter(e => e.email_status === 'opened').length;
+      const sent = emailData.length;
+      const opened = emailData.filter((e: any) => e.email_status === 'opened').length;
 
       return {
         deals: dealCounts,

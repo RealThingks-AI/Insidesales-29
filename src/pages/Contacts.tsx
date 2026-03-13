@@ -53,6 +53,17 @@ const Contacts = () => {
     if (selectedContacts.length === 0) return;
     setShowDeleteConfirm(false);
     try {
+      // Clean up related records to avoid orphans
+      await Promise.all([
+        supabase.from('deal_stakeholders').delete().in('contact_id', selectedContacts),
+        supabase.from('campaign_contacts').delete().in('contact_id', selectedContacts),
+        // Null out stakeholder contact references in deals
+        supabase.from('deals').update({ budget_owner_contact_id: null }).in('budget_owner_contact_id', selectedContacts),
+        supabase.from('deals').update({ champion_contact_id: null }).in('champion_contact_id', selectedContacts),
+        supabase.from('deals').update({ objector_contact_id: null }).in('objector_contact_id', selectedContacts),
+        supabase.from('deals').update({ influencer_contact_id: null }).in('influencer_contact_id', selectedContacts),
+      ]);
+
       const { error } = await supabase.from('contacts').delete().in('id', selectedContacts);
       if (error) throw error;
 

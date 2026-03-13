@@ -121,7 +121,7 @@ interface DealFormProps {
         ...formData,
         deal_name: formData.project_name || formData.deal_name || 'Untitled Deal',
         modified_at: new Date().toISOString(),
-        modified_by: deal?.created_by || formData.created_by
+        modified_by: user?.id || deal?.created_by || formData.created_by
       };
       
       await onSave(saveData);
@@ -136,13 +136,13 @@ interface DealFormProps {
       }
       
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error("=== DEAL FORM SAVE ERROR ===");
       console.error("Error details:", error);
       
       toast({
         title: "Error",
-        description: `Failed to save deal: ${error.message || 'Unknown error'}`,
+        description: `Failed to save deal: ${error?.message || 'Unknown error'}`,
         variant: "destructive",
       });
     } finally {
@@ -162,7 +162,7 @@ interface DealFormProps {
           stage: nextStage,
           deal_name: formData.project_name || formData.deal_name || 'Untitled Deal',
           modified_at: new Date().toISOString(),
-          modified_by: deal?.created_by || formData.created_by
+          modified_by: user?.id || deal?.created_by || formData.created_by
         };
         
         await onSave(updatedData);
@@ -199,15 +199,15 @@ interface DealFormProps {
         stage: finalStage,
         deal_name: formData.project_name || formData.deal_name || 'Untitled Deal',
         modified_at: new Date().toISOString(),
-        modified_by: deal?.created_by || formData.created_by
-      };
-      
-      setFormData(updatedData);
-      await onSave(updatedData);
-      
-      toast({
-        title: "Success",
-        description: `Deal moved to ${finalStage} stage`,
+          modified_by: user?.id || deal?.created_by || formData.created_by
+        };
+        
+        setFormData(updatedData);
+        await onSave(updatedData);
+        
+        toast({
+          title: "Success",
+          description: `Deal moved to ${finalStage} stage`,
       });
       
       onClose();
@@ -236,15 +236,15 @@ interface DealFormProps {
         stage: targetStage,
         deal_name: formData.project_name || formData.deal_name || 'Untitled Deal',
         modified_at: new Date().toISOString(),
-        modified_by: deal?.created_by || formData.created_by
-      };
-      
-      setFormData(updatedData);
-      await onSave(updatedData);
-      
-      toast({
-        title: "Success",
-        description: `Deal moved to ${targetStage} stage`,
+          modified_by: user?.id || deal?.created_by || formData.created_by
+        };
+        
+        setFormData(updatedData);
+        await onSave(updatedData);
+        
+        toast({
+          title: "Success",
+          description: `Deal moved to ${targetStage} stage`,
       });
       
       onClose();

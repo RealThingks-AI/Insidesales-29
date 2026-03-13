@@ -5,6 +5,7 @@ import { User, Shield, Mail, Megaphone } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { usePermissions } from "@/contexts/PermissionsContext";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 // Lazy load heavy settings pages
 const AccountSettingsPage = lazy(() => import("@/components/settings/AccountSettingsPage"));
@@ -185,9 +186,11 @@ const Settings = () => {
           aria-labelledby={`tab-${activeTab}`}
           tabIndex={0}
         >
-          <Suspense fallback={<SettingsContentSkeleton />}>
-            {renderContent()}
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={<SettingsContentSkeleton />}>
+              {renderContent()}
+            </Suspense>
+          </ErrorBoundary>
         </div>
       </ScrollArea>
     </div>
