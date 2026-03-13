@@ -47,9 +47,11 @@ export function TodaysTasksPopup() {
 
   useEffect(() => {
     if (!user) return;
-    const dismissed = localStorage.getItem(`${STORAGE_PREFIX}${todayKey}`);
-    if (!dismissed) {
+    const dismissedForDay = localStorage.getItem(`${STORAGE_PREFIX}${todayKey}`);
+    const shownThisSession = sessionStorage.getItem(SESSION_KEY);
+    if (!dismissedForDay && !shownThisSession) {
       setOpen(true);
+      sessionStorage.setItem(SESSION_KEY, 'true');
     }
   }, [user, todayKey]);
 
