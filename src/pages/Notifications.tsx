@@ -206,7 +206,7 @@ const Notifications = () => {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={handleClearAll}
+                onClick={() => setShowClearConfirm(true)}
                 className="flex items-center gap-2 text-destructive hover:text-destructive"
               >
                 <Trash2 className="h-4 w-4" />
