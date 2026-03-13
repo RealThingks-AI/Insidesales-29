@@ -59,15 +59,8 @@ const Dashboard = () => {
               </Button>
             </div>
 
-            {/* Refresh */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => queryClient.invalidateQueries({ queryKey: ['dashboard-data'] })}
-            >
-              <RefreshCw className="h-4 w-4" />
-            </Button>
+
+
 
             <NotificationBell placement="down" size="small" />
 
