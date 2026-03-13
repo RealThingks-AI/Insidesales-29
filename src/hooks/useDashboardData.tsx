@@ -83,29 +83,28 @@ export const useDashboardData = () => {
       const dealStages = ['Lead', 'Discussions', 'Qualified', 'RFQ', 'Offered', 'Won', 'Lost', 'Dropped'];
       const dealCounts = dealStages.map(stage => ({
         stage,
-        count: (dealsRes.data || []).filter(d => d.stage === stage).length,
+        count: dealsData.filter((d: any) => d.stage === stage).length,
       }));
 
       // Process accounts - aligned with Accounts page filter options
       const accountStatuses = ['New', 'Working', 'Qualified', 'Inactive'];
       const accountCounts = accountStatuses.map(status => ({
         status,
-        count: (accountsRes.data || []).filter(a => (a.status || 'New') === status).length,
+        count: accountsData.filter((a: any) => (a.status || 'New') === status).length,
       }));
 
       // Process contacts
       const contactSources = ['Website', 'Referral', 'LinkedIn', 'Other'];
-      const contactData = (contactsRes.data || []);
       const contactCounts = contactSources.map(source => {
         if (source === 'Other') {
           return {
             source,
-            count: contactData.filter(c => !['Website', 'Referral', 'LinkedIn'].includes(c.contact_source || '')).length,
+            count: contactsData.filter((c: any) => !['Website', 'Referral', 'LinkedIn'].includes(c.contact_source || '')).length,
           };
         }
         return {
           source,
-          count: contactData.filter(c => c.contact_source === source).length,
+          count: contactsData.filter((c: any) => c.contact_source === source).length,
         };
       });
 
@@ -113,13 +112,12 @@ export const useDashboardData = () => {
       const actionStatuses = ['Open', 'In Progress', 'Completed', 'Cancelled'];
       const actionCounts = actionStatuses.map(status => ({
         status,
-        count: (actionItemsRes.data || []).filter(a => a.status === status).length,
+        count: actionItemsData.filter((a: any) => a.status === status).length,
       }));
 
       // Process email stats
-      const emails = emailRes.data || [];
-      const sent = emails.length;
-      const opened = emails.filter(e => e.email_status === 'opened').length;
+      const sent = emailData.length;
+      const opened = emailData.filter((e: any) => e.email_status === 'opened').length;
 
       return {
         deals: dealCounts,
