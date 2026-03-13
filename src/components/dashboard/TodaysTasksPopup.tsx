@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 
 const STORAGE_PREFIX = 'tasks-popup-dismissed-';
+const SESSION_KEY = 'tasks-popup-shown-session';
 
 const priorityColor: Record<string, string> = {
   High: 'bg-destructive/10 text-destructive border-destructive/20',
