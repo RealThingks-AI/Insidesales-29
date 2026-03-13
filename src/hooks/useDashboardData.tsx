@@ -132,5 +132,6 @@ export const useDashboardData = () => {
     },
     enabled: !!user && !roleLoading,
     staleTime: 30000,
+    refetchInterval: 60000,
   });
 };

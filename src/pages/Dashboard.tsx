@@ -4,7 +4,7 @@ import { TodaysTasksPopup } from "@/components/dashboard/TodaysTasksPopup";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { NotificationBell } from "@/components/NotificationBell";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, LayoutDashboard, TrendingUp } from "lucide-react";
+import { LayoutDashboard, TrendingUp } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useQueryClient } from "@tanstack/react-query";
@@ -59,15 +59,8 @@ const Dashboard = () => {
               </Button>
             </div>
 
-            {/* Refresh */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => queryClient.invalidateQueries({ queryKey: ['dashboard-data'] })}
-            >
-              <RefreshCw className="h-4 w-4" />
-            </Button>
+
+
 
             <NotificationBell placement="down" size="small" />
 
