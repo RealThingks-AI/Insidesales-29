@@ -93,8 +93,11 @@ const Notifications = () => {
     await markAllAsRead();
   };
 
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
+
   const handleClearAll = async () => {
     if (!user) return;
+    setShowClearConfirm(false);
     
     try {
       const { error } = await supabase

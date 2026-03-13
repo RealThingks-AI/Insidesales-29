@@ -70,8 +70,8 @@ export const useDashboardData = () => {
         count: (dealsRes.data || []).filter(d => d.stage === stage).length,
       }));
 
-      // Process accounts
-      const accountStatuses = ['New', 'Working', 'Hot', 'Nurture'];
+      // Process accounts - aligned with Accounts page filter options
+      const accountStatuses = ['New', 'Working', 'Qualified', 'Inactive'];
       const accountCounts = accountStatuses.map(status => ({
         status,
         count: (accountsRes.data || []).filter(a => (a.status || 'New') === status).length,

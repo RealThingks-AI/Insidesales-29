@@ -185,9 +185,11 @@ const Settings = () => {
           aria-labelledby={`tab-${activeTab}`}
           tabIndex={0}
         >
-          <Suspense fallback={<SettingsContentSkeleton />}>
-            {renderContent()}
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={<SettingsContentSkeleton />}>
+              {renderContent()}
+            </Suspense>
+          </ErrorBoundary>
         </div>
       </ScrollArea>
     </div>

@@ -236,15 +236,15 @@ interface DealFormProps {
         stage: targetStage,
         deal_name: formData.project_name || formData.deal_name || 'Untitled Deal',
         modified_at: new Date().toISOString(),
-        modified_by: deal?.created_by || formData.created_by
-      };
-      
-      setFormData(updatedData);
-      await onSave(updatedData);
-      
-      toast({
-        title: "Success",
-        description: `Deal moved to ${targetStage} stage`,
+          modified_by: user?.id || deal?.created_by || formData.created_by
+        };
+        
+        setFormData(updatedData);
+        await onSave(updatedData);
+        
+        toast({
+          title: "Success",
+          description: `Deal moved to ${targetStage} stage`,
       });
       
       onClose();
