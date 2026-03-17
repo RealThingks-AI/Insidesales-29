@@ -39,6 +39,33 @@
 | 20 | Added ErrorBoundary around lazy-loaded Settings pages | ✅ Done |
 | 21 | Fixed error type assertion in DealForm catch blocks | ✅ Done |
 
+---
+
+## ✅ Campaign Module Deep Audit — All Fixes Completed
+
+### Critical
+| # | Issue | Status |
+|---|-------|--------|
+| C1 | Edge Function `send-campaign-email` used invalid `getClaims()` — replaced with `getUser()` | ✅ Done |
+| C2 | Edge Function not configured in `config.toml` — added `verify_jwt = false` | ✅ Done |
+
+### High
+| # | Issue | Status |
+|---|-------|--------|
+| C3 | Campaign delete did not nullify `deals.campaign_id` — added cleanup | ✅ Done |
+| C4 | Campaign delete did not delete linked `action_items` — added cleanup | ✅ Done |
+
+### Medium
+| # | Issue | Status |
+|---|-------|--------|
+| C5 | Outreach tab empty string Select values — replaced with "none" sentinel | ✅ Done |
+| C6 | Action Items tab missing "Assigned To" column — added with display names | ✅ Done |
+
+### Low
+| # | Issue | Status |
+|---|-------|--------|
+| C7 | Outreach communications table had no pagination — added StandardPagination | ✅ Done |
+
 ## User Constraints
 - No separate Leads or Meetings modules
 - Consistent Action Items terminology everywhere
