@@ -67,7 +67,7 @@ export function useCampaigns() {
 
   const deleteCampaign = useMutation({
     mutationFn: async (id: string) => {
-      // Delete child records first to avoid orphans
+      // Delete child records and nullify references to avoid orphans
       await Promise.all([
         supabase.from('campaign_contacts').delete().eq('campaign_id', id),
         supabase.from('campaign_accounts').delete().eq('campaign_id', id),
@@ -75,6 +75,8 @@ export function useCampaigns() {
         supabase.from('campaign_email_templates').delete().eq('campaign_id', id),
         supabase.from('campaign_phone_scripts').delete().eq('campaign_id', id),
         supabase.from('campaign_materials').delete().eq('campaign_id', id),
+        supabase.from('action_items').delete().eq('module_type', 'campaigns').eq('module_id', id),
+        supabase.from('deals').update({ campaign_id: null }).eq('campaign_id', id),
       ]);
       const { error } = await supabase.from('campaigns').delete().eq('id', id);
       if (error) throw error;

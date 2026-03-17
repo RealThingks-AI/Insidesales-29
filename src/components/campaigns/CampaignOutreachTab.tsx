@@ -172,7 +172,7 @@ export function CampaignOutreachTab({ campaignId, initialTemplateId, onTemplateP
           subject: processedSubject,
           body: processedBody,
           contactId: sendForm.contact_id,
-          accountId: sendForm.account_id || null,
+          accountId: (sendForm.account_id && sendForm.account_id !== 'none') ? sendForm.account_id : null,
           campaignId,
         }),
       });

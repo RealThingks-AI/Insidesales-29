@@ -167,6 +167,9 @@ export function CampaignActionItemsTab({ campaignId }: Props) {
                       {item.priority}
                     </Badge>
                   </TableCell>
+                  <TableCell className="text-sm">
+                    {item.assigned_to ? (displayNames[item.assigned_to] || '—') : '—'}
+                  </TableCell>
                   <TableCell>
                     <Select value={item.status} onValueChange={v => updateStatus.mutate({ id: item.id, status: v })}>
                       <SelectTrigger className="h-7 w-[120px] text-xs">
