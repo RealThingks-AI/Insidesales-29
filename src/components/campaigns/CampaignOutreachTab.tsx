@@ -12,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Plus, Mail, Phone, Linkedin, Calendar, RefreshCw, Send } from 'lucide-react';
+import { StandardPagination } from '@/components/shared/StandardPagination';
 import { COMMUNICATION_TYPES, EMAIL_TYPES, EMAIL_STATUSES, CALL_OUTCOMES, LINKEDIN_STATUSES } from '@/types/campaign';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
