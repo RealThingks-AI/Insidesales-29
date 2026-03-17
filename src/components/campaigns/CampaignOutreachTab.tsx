@@ -348,7 +348,7 @@ export function CampaignOutreachTab({ campaignId, initialTemplateId, onTemplateP
               <Select value={form.account_id} onValueChange={v => set('account_id', v)}>
                 <SelectTrigger className="h-9"><SelectValue placeholder="Select account (optional)" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="none">None</SelectItem>
                   {accounts.map(a => (
                     <SelectItem key={a.account_id} value={a.account_id}>{a.accounts?.account_name || a.account_id}</SelectItem>
                   ))}
