@@ -143,6 +143,7 @@ export function CampaignActionItemsTab({ campaignId }: Props) {
             <TableRow>
               <TableHead>Action Item</TableHead>
               <TableHead>Priority</TableHead>
+              <TableHead>Assigned To</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Due Date</TableHead>
               <TableHead className="w-10"></TableHead>
