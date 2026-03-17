@@ -82,7 +82,7 @@ export function CampaignOutreachTab({ campaignId, initialTemplateId, onTemplateP
     await addCommunication.mutateAsync({
       communication_type: form.communication_type,
       contact_id: form.contact_id || null,
-      account_id: form.account_id || null,
+      account_id: (form.account_id && form.account_id !== 'none') ? form.account_id : null,
       subject: form.subject || null,
       body: form.body || null,
       email_type: form.email_type || null,
