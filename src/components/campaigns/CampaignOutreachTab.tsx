@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useCampaignCommunications, useCampaignContacts, useCampaignAccounts, useCampaignEmailTemplates } from '@/hooks/useCampaigns';
 import { useUserDisplayNames } from '@/hooks/useUserDisplayNames';
 import { useAuth } from '@/hooks/useAuth';
@@ -12,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Plus, Mail, Phone, Linkedin, Calendar, RefreshCw, Send } from 'lucide-react';
+import { StandardPagination } from '@/components/shared/StandardPagination';
 import { COMMUNICATION_TYPES, EMAIL_TYPES, EMAIL_STATUSES, CALL_OUTCOMES, LINKEDIN_STATUSES } from '@/types/campaign';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
@@ -40,6 +41,8 @@ export function CampaignOutreachTab({ campaignId, initialTemplateId, onTemplateP
   const [logOpen, setLogOpen] = useState(false);
   const [sendOpen, setSendOpen] = useState(false);
   const [sending, setSending] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
 
   // Fetch sender's display name for {{sender_name}} placeholder
   const senderNameQuery = useQuery({
@@ -82,7 +85,7 @@ export function CampaignOutreachTab({ campaignId, initialTemplateId, onTemplateP
     await addCommunication.mutateAsync({
       communication_type: form.communication_type,
       contact_id: form.contact_id || null,
-      account_id: form.account_id || null,
+      account_id: (form.account_id && form.account_id !== 'none') ? form.account_id : null,
       subject: form.subject || null,
       body: form.body || null,
       email_type: form.email_type || null,
@@ -172,7 +175,7 @@ export function CampaignOutreachTab({ campaignId, initialTemplateId, onTemplateP
           subject: processedSubject,
           body: processedBody,
           contactId: sendForm.contact_id,
-          accountId: sendForm.account_id || null,
+          accountId: (sendForm.account_id && sendForm.account_id !== 'none') ? sendForm.account_id : null,
           campaignId,
         }),
       });
@@ -208,47 +211,66 @@ export function CampaignOutreachTab({ campaignId, initialTemplateId, onTemplateP
 
       {!query.data?.length ? (
         <p className="text-sm text-muted-foreground text-center py-8">No communications logged yet</p>
-      ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Type</TableHead>
-              <TableHead>Contact</TableHead>
-              <TableHead>Account</TableHead>
-              <TableHead>Subject</TableHead>
-              <TableHead>Status/Outcome</TableHead>
-              <TableHead>Owner</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead>Notes</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {query.data.map(c => {
-              const Icon = typeIcons[c.communication_type] || Mail;
-              const statusText = c.email_status || c.call_outcome || c.linkedin_status || c.outcome || '—';
-              const ownerId = c.owner || c.created_by;
-              const ownerName = ownerId ? (displayNames[ownerId] || '—') : '—';
-              return (
-                <TableRow key={c.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-1.5 text-sm">
-                      <Icon className="h-3.5 w-3.5 text-muted-foreground" />
-                      {c.communication_type}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-sm">{(c as any).contacts?.contact_name || '—'}</TableCell>
-                  <TableCell className="text-sm">{(c as any).accounts?.account_name || '—'}</TableCell>
-                  <TableCell className="text-sm">{c.subject || '—'}</TableCell>
-                  <TableCell className="text-sm">{statusText}</TableCell>
-                  <TableCell className="text-sm">{ownerName}</TableCell>
-                  <TableCell className="text-sm">{format(new Date(c.communication_date), 'dd MMM yyyy')}</TableCell>
-                  <TableCell className="text-sm max-w-[200px] truncate">{c.notes || '—'}</TableCell>
+      ) : (() => {
+        const allData = query.data;
+        const totalItems = allData.length;
+        const totalPages = Math.ceil(totalItems / pageSize);
+        const paginatedData = allData.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+        return (
+          <>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Contact</TableHead>
+                  <TableHead>Account</TableHead>
+                  <TableHead>Subject</TableHead>
+                  <TableHead>Status/Outcome</TableHead>
+                  <TableHead>Owner</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Notes</TableHead>
                 </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      )}
+              </TableHeader>
+              <TableBody>
+                {paginatedData.map(c => {
+                  const Icon = typeIcons[c.communication_type] || Mail;
+                  const statusText = c.email_status || c.call_outcome || c.linkedin_status || c.outcome || '—';
+                  const ownerId = c.owner || c.created_by;
+                  const ownerName = ownerId ? (displayNames[ownerId] || '—') : '—';
+                  return (
+                    <TableRow key={c.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-1.5 text-sm">
+                          <Icon className="h-3.5 w-3.5 text-muted-foreground" />
+                          {c.communication_type}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-sm">{(c as any).contacts?.contact_name || '—'}</TableCell>
+                      <TableCell className="text-sm">{(c as any).accounts?.account_name || '—'}</TableCell>
+                      <TableCell className="text-sm">{c.subject || '—'}</TableCell>
+                      <TableCell className="text-sm">{statusText}</TableCell>
+                      <TableCell className="text-sm">{ownerName}</TableCell>
+                      <TableCell className="text-sm">{format(new Date(c.communication_date), 'dd MMM yyyy')}</TableCell>
+                      <TableCell className="text-sm max-w-[200px] truncate">{c.notes || '—'}</TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+            {totalPages > 1 && (
+              <StandardPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={totalItems}
+                itemsPerPage={pageSize}
+                onPageChange={setCurrentPage}
+                onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }}
+                entityName="communications"
+              />
+            )}
+          </>
+        );
+      })()}
 
       {/* Send Email Dialog */}
       <Dialog open={sendOpen} onOpenChange={setSendOpen}>
@@ -275,7 +297,7 @@ export function CampaignOutreachTab({ campaignId, initialTemplateId, onTemplateP
                 <Select value={sendForm.account_id} onValueChange={v => setSendForm(f => ({ ...f, account_id: v }))}>
                   <SelectTrigger className="h-9"><SelectValue placeholder="Optional" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="none">None</SelectItem>
                     {accounts.map(a => (
                       <SelectItem key={a.account_id} value={a.account_id}>{a.accounts?.account_name || a.account_id}</SelectItem>
                     ))}
@@ -348,7 +370,7 @@ export function CampaignOutreachTab({ campaignId, initialTemplateId, onTemplateP
               <Select value={form.account_id} onValueChange={v => set('account_id', v)}>
                 <SelectTrigger className="h-9"><SelectValue placeholder="Select account (optional)" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="none">None</SelectItem>
                   {accounts.map(a => (
                     <SelectItem key={a.account_id} value={a.account_id}>{a.accounts?.account_name || a.account_id}</SelectItem>
                   ))}

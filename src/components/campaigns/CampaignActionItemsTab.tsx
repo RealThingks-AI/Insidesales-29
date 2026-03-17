@@ -124,6 +124,8 @@ export function CampaignActionItemsTab({ campaignId }: Props) {
   });
 
   const items = query.data || [];
+  const assigneeIds = [...new Set(items.filter(i => i.assigned_to).map(i => i.assigned_to as string))];
+  const { displayNames } = useUserDisplayNames(assigneeIds);
   const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
 
   return (
@@ -143,6 +145,7 @@ export function CampaignActionItemsTab({ campaignId }: Props) {
             <TableRow>
               <TableHead>Action Item</TableHead>
               <TableHead>Priority</TableHead>
+              <TableHead>Assigned To</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Due Date</TableHead>
               <TableHead className="w-10"></TableHead>
@@ -163,6 +166,9 @@ export function CampaignActionItemsTab({ campaignId }: Props) {
                     <Badge variant="outline" className={priorityColors[item.priority] || ''}>
                       {item.priority}
                     </Badge>
+                  </TableCell>
+                  <TableCell className="text-sm">
+                    {item.assigned_to ? (displayNames[item.assigned_to] || '—') : '—'}
                   </TableCell>
                   <TableCell>
                     <Select value={item.status} onValueChange={v => updateStatus.mutate({ id: item.id, status: v })}>
