@@ -211,47 +211,66 @@ export function CampaignOutreachTab({ campaignId, initialTemplateId, onTemplateP
 
       {!query.data?.length ? (
         <p className="text-sm text-muted-foreground text-center py-8">No communications logged yet</p>
-      ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Type</TableHead>
-              <TableHead>Contact</TableHead>
-              <TableHead>Account</TableHead>
-              <TableHead>Subject</TableHead>
-              <TableHead>Status/Outcome</TableHead>
-              <TableHead>Owner</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead>Notes</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {query.data.map(c => {
-              const Icon = typeIcons[c.communication_type] || Mail;
-              const statusText = c.email_status || c.call_outcome || c.linkedin_status || c.outcome || '—';
-              const ownerId = c.owner || c.created_by;
-              const ownerName = ownerId ? (displayNames[ownerId] || '—') : '—';
-              return (
-                <TableRow key={c.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-1.5 text-sm">
-                      <Icon className="h-3.5 w-3.5 text-muted-foreground" />
-                      {c.communication_type}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-sm">{(c as any).contacts?.contact_name || '—'}</TableCell>
-                  <TableCell className="text-sm">{(c as any).accounts?.account_name || '—'}</TableCell>
-                  <TableCell className="text-sm">{c.subject || '—'}</TableCell>
-                  <TableCell className="text-sm">{statusText}</TableCell>
-                  <TableCell className="text-sm">{ownerName}</TableCell>
-                  <TableCell className="text-sm">{format(new Date(c.communication_date), 'dd MMM yyyy')}</TableCell>
-                  <TableCell className="text-sm max-w-[200px] truncate">{c.notes || '—'}</TableCell>
+      ) : (() => {
+        const allData = query.data;
+        const totalItems = allData.length;
+        const totalPages = Math.ceil(totalItems / pageSize);
+        const paginatedData = allData.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+        return (
+          <>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Contact</TableHead>
+                  <TableHead>Account</TableHead>
+                  <TableHead>Subject</TableHead>
+                  <TableHead>Status/Outcome</TableHead>
+                  <TableHead>Owner</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Notes</TableHead>
                 </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      )}
+              </TableHeader>
+              <TableBody>
+                {paginatedData.map(c => {
+                  const Icon = typeIcons[c.communication_type] || Mail;
+                  const statusText = c.email_status || c.call_outcome || c.linkedin_status || c.outcome || '—';
+                  const ownerId = c.owner || c.created_by;
+                  const ownerName = ownerId ? (displayNames[ownerId] || '—') : '—';
+                  return (
+                    <TableRow key={c.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-1.5 text-sm">
+                          <Icon className="h-3.5 w-3.5 text-muted-foreground" />
+                          {c.communication_type}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-sm">{(c as any).contacts?.contact_name || '—'}</TableCell>
+                      <TableCell className="text-sm">{(c as any).accounts?.account_name || '—'}</TableCell>
+                      <TableCell className="text-sm">{c.subject || '—'}</TableCell>
+                      <TableCell className="text-sm">{statusText}</TableCell>
+                      <TableCell className="text-sm">{ownerName}</TableCell>
+                      <TableCell className="text-sm">{format(new Date(c.communication_date), 'dd MMM yyyy')}</TableCell>
+                      <TableCell className="text-sm max-w-[200px] truncate">{c.notes || '—'}</TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+            {totalPages > 1 && (
+              <StandardPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={totalItems}
+                itemsPerPage={pageSize}
+                onPageChange={setCurrentPage}
+                onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }}
+                entityName="communications"
+              />
+            )}
+          </>
+        );
+      })()}
 
       {/* Send Email Dialog */}
       <Dialog open={sendOpen} onOpenChange={setSendOpen}>
