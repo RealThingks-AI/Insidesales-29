@@ -41,6 +41,8 @@ export function CampaignOutreachTab({ campaignId, initialTemplateId, onTemplateP
   const [logOpen, setLogOpen] = useState(false);
   const [sendOpen, setSendOpen] = useState(false);
   const [sending, setSending] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
 
   // Fetch sender's display name for {{sender_name}} placeholder
   const senderNameQuery = useQuery({
